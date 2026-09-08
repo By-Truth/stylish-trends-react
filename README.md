@@ -1,25 +1,27 @@
 # Stylish Trends — React Storefront & Admin Panel
 
-A full React + TypeScript rebuild of [Stylish Trends](https://www.instagram.com/_stylishtrends.ng)'s
-e-commerce site — same PHP + MySQL backend, entirely new frontend: storefront
-and full admin panel, both talking to real API endpoints (not mock data).
+A full React + TypeScript rewrite of the frontend and admin panel for
+[Stylish Trends](https://www.instagram.com/_stylishtrends.ng), my Nigerian
+fashion e-commerce store. Same PHP + MySQL backend as before, but the whole
+frontend is new — storefront and full admin panel, both talking to real API
+endpoints instead of mock data.
 
-This is a companion project to the original PHP/vanilla-JS/Bootstrap site,
-which is kept untouched in its own repository. Nothing here modifies that
-project's code — this repo only *adds* two small backend files (see
-[`server/README.md`](server/README.md)) that the admin panel needs and the
-original API didn't have.
+The original PHP/vanilla-JS/Bootstrap build still lives in its own repo and
+I haven't touched it. This project only *adds* two small backend files (see
+[`server/README.md`](server/README.md)) for admin features the original API
+never had — everything else on the PHP side stays exactly as it was.
 
-## Why this exists
+## Why I rebuilt it
 
-The original site's frontend (`js/main.js`) never actually called its own
-API — the cart lived in `localStorage`, login was a `setTimeout` that faked
-success, and checkout never touched the real `orders` table, even though
-`api/index.php` has a complete, working REST API for auth, products, orders,
-Paystack, coupons, and reviews. This project wires a real frontend up to
+The old frontend never actually talked to its own API — the cart lived in
+`localStorage`, login was a `setTimeout` that faked success, and checkout
+never touched the real `orders` table, even though `api/index.php` already
+had a complete REST API for auth, products, orders, Paystack, coupons, and
+reviews sitting there unused. So this rebuild wires a real frontend up to
 that real backend: register/login actually authenticate against MySQL, the
 cart total at checkout is recalculated server-side, Paystack payments are
-verified server-side, and the admin panel manages live data.
+verified server-side, and the admin panel manages live data instead of
+placeholders.
 
 ## Stack
 
@@ -27,9 +29,9 @@ verified server-side, and the admin panel manages live data.
 - **React Router 7** for routing (storefront + a separate `/admin/*` tree)
 - **TanStack Query** for all server state (no manual loading/error boilerplate)
 - **Zustand** for client state (cart, with `localStorage` persistence; auth)
-- **Tailwind CSS v4** for styling — a redesigned visual identity (serif
-  display type, a warmer ink/clay palette) rather than a 1:1 port of the
-  original design
+- **Tailwind CSS v4** for styling — I also took the chance to refresh the
+  visual identity (serif display type, a warmer ink/clay palette) rather
+  than just porting the old design 1:1
 - **Playwright** for a couple of end-to-end smoke scripts (`e2e/`)
 - Backend: the existing PHP 8 + MySQL API, unchanged, plus one additive
   file (`server/admin-extra.php`) — see below
@@ -97,10 +99,10 @@ Then sign in at `/admin/login`.
 
 ## End-to-end tests
 
-Two Playwright scripts exercise the real app against a real backend (no
-mocking): one walks the storefront (browse → add to cart → register →
-checkout), the other logs into the admin panel and performs a real create
-+ a real status update.
+I wrote two Playwright scripts that exercise the real app against a real
+backend (no mocking): one walks the storefront (browse → add to cart →
+register → checkout), the other logs into the admin panel and performs a
+real create + a real status update.
 
 ```bash
 npx playwright install chromium   # once
@@ -117,8 +119,7 @@ any console/page errors it saw.
 **Same-origin (recommended).** Build (`npm run build`) and copy the
 contents of `dist/` into the same host/domain that serves `api/` and
 `images/` — e.g. the same `public_html` on your cPanel host, replacing the
-old static HTML pages there (the old repo itself is untouched; only the
-*live* files at that path change). This keeps everything on one origin, so
+old static HTML pages there. This keeps everything on one origin, so
 session cookies and API calls just work with zero config. You'll want an
 `.htaccess` rule that falls back unmatched routes to `index.html` for
 client-side routing, while still leaving `/api/*` and `/images/*` alone —
@@ -133,12 +134,11 @@ RewriteRule ^ index.html [L]
 ```
 
 **Separate domain/subdomain.** Works, but the PHP API's session cookie and
-CORS headers (in `includes/config.php`) are currently set up for a single
-trusted origin, not a public cross-site setup with credentials — you'd need
-to add `Access-Control-Allow-Credentials: true`, echo back the specific
-requesting origin, and set the session cookie's `SameSite=None; Secure`.
-That's a deliberate change to files this project leaves alone by default;
-same-origin deployment avoids needing it at all.
+CORS headers (in `includes/config.php`) are set up for a single trusted
+origin, not a public cross-site setup with credentials — you'd need to add
+`Access-Control-Allow-Credentials: true`, echo back the specific requesting
+origin, and set the session cookie's `SameSite=None; Secure`. I've left
+that alone for now since same-origin deployment avoids needing it at all.
 
 ## Project structure
 
@@ -155,3 +155,4 @@ src/
 server/           Additive PHP files for the admin panel (see its README)
 e2e/              Playwright smoke scripts
 ```
+
