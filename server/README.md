@@ -1,6 +1,6 @@
-# Backend additions for the React admin panel
+# Backend additions for the admin panel
 
-Your existing PHP project (`api/index.php` + `includes/config.php` +
+My existing PHP project (`api/index.php` + `includes/config.php` +
 `includes/schema.sql`) already covers everything the **storefront** needs:
 products, auth, orders, Paystack, coupons, reviews. Nothing in this folder
 touches those files.
@@ -8,25 +8,25 @@ touches those files.
 The admin panel, though, needs a few endpoints the original API doesn't
 have — categories CRUD, coupons CRUD, a customers list, review moderation,
 a settings store, image upload/media library, and CSV export. The two files
-here add exactly that, as a **separate, additive file** next to your
+here add exactly that, as a **separate, additive file** next to the
 existing API.
 
 ## Install (two steps, ~2 minutes)
 
-1. Copy `admin-extra.php` into your existing project's `api/` folder, so
-   you end up with both `api/index.php` and `api/admin-extra.php` side by
-   side. It reuses `getDB()`, `jsonResponse()`, `sanitize()`, `requireAuth()`
-   and `requireAdmin()` from your existing `includes/config.php` — no
-   changes needed there.
+1. Copy `admin-extra.php` into the existing project's `api/` folder, so you
+   end up with both `api/index.php` and `api/admin-extra.php` side by side.
+   It reuses `getDB()`, `jsonResponse()`, `sanitize()`, `requireAuth()` and
+   `requireAdmin()` from the existing `includes/config.php` — no changes
+   needed there.
 
-2. Run `extra-schema.sql` once against your existing `stylish_trends`
+2. Run `extra-schema.sql` once against the existing `stylish_trends`
    database (phpMyAdmin → Import, or `mysql -u root stylish_trends <
    extra-schema.sql`). It only adds one new table, `settings`, seeded with
    sensible defaults for store info, shipping zones, WhatsApp, and payment
-   display settings. It does not alter any existing table.
+   display settings. It doesn't alter any existing table.
 
 That's it — `admin-extra.php` is immediately reachable at
-`/api/admin-extra.php?resource=...` on whatever host serves your existing
+`/api/admin-extra.php?resource=...` on whatever host serves the existing
 `api/index.php`.
 
 ## What it adds
@@ -47,10 +47,10 @@ That's it — `admin-extra.php` is immediately reachable at
 
 `api/index.php`'s `createOrder()` calculates shipping with a hardcoded
 ₦50,000 threshold / ₦2,500 fee. The Shipping Zones admin page writes to the
-new `settings` table and the storefront *displays* those numbers, but the
-original file was left untouched, so the real order total at checkout still
-uses the hardcoded values. If you want the Shipping page to actually
-control pricing, add a few lines to `createOrder()` in `index.php` that
-read from `settings` instead of the literals — that's a one-file, ~5-line
-change, deliberately left to you rather than made silently in a file you
-asked to keep intact.
+new `settings` table and the storefront *displays* those numbers, but
+`createOrder()` itself still uses the hardcoded values since I left the
+original file untouched. If I want the Shipping page to actually control
+pricing, the fix is a one-file, ~5-line change to `createOrder()` to read
+from `settings` instead of the literals — just haven't rolled that into the
+original API yet.
+
